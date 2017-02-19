@@ -1,0 +1,23 @@
+version: '2'
+services:
+  sources:
+    image: alpine
+    volumes:
+      - .:/screencatcher
+    command: /bin/true
+  linux:
+    build: docker/linux
+    volumes_from:
+     - sources
+    command: gcc -Wall -std=c99 -o screencatcher-linux64 src/main.c -lX11 -lXrandr -lXinerama -lpthread
+  osx:
+    build: docker/osx
+    volumes_from:
+     - sources
+    command: o64-clang -Wall -o screencatcher-osx src/main.c -pthread -framework Cocoa -framework OpenGL -framework IOKit -framework Carbon -framework CoreFoundation -framework CoreVideo
+  windows:
+    build: docker/windows
+    volumes_from:
+     - sources
+    command: x86_64-w64-mingw32-gcc-win32 -Wall -std=c99 -o screencatcher-win64.exe src/main.c -lwsock32 -lws2_32 -lgdi32 -luser32
+
