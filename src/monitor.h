@@ -180,8 +180,6 @@ bool get_settings(DEVMODEW *settings, WCHAR *parent, int index)
 
 bool is_acceptable_mode(MONITOR *monitor, DEVMODEW *settings)
 {
-    if(15 < settings->dmBitsPerPel)
-        return false;
 
     if(monitor->_data->modes_pruned)
     {
