@@ -41,8 +41,7 @@ struct libmonitors_monitor_data;
 struct libmonitors_mode_data;
 struct libmonitors_monitor;
 
-MONITORS_EXPORT struct libmonitors_mode
-{
+MONITORS_EXPORT struct libmonitors_mode {
     struct libmonitors_monitor *monitor;
     int width;
     int height;
@@ -50,8 +49,7 @@ MONITORS_EXPORT struct libmonitors_mode
     struct libmonitors_mode_data *_data;
 };
 
-MONITORS_EXPORT struct libmonitors_monitor
-{
+MONITORS_EXPORT struct libmonitors_monitor {
     char *name;
     bool primary;
     int width;
@@ -106,8 +104,7 @@ MODE *alloc_modes(int count)
 
 void free_modes(int count, MODE *modes)
 {
-    for(int i=0; i<count; ++i)
-    {
+    for(int i=0; i<count; ++i) {
         if(modes[i]._data != NULL)
             free(modes[i]._data);
     }
@@ -127,8 +124,7 @@ MONITORS_EXPORT void libmonitors_free_monitor(MONITOR *monitor)
 
 MONITORS_EXPORT void libmonitors_free_monitors(int count, MONITOR **monitors)
 {
-    for(int i=0; i<count; ++i)
-    {
+    for(int i=0; i<count; ++i) {
         libmonitors_free_monitor(monitors[i]);
     }
     free(monitors);
@@ -136,12 +132,11 @@ MONITORS_EXPORT void libmonitors_free_monitors(int count, MONITOR **monitors)
 
 bool is_duplicate_mode(MODE *mode, int count, MODE *modes)
 {
-    for(int i=0; i<count; ++i)
-    {
+    for(int i=0; i<count; ++i) {
         if(&modes[i] != mode
-                && modes[i].width == mode->width
-                && modes[i].height == mode->height
-                && modes[i].refresh == mode->refresh)
+           && modes[i].width == mode->width
+           && modes[i].height == mode->height
+           && modes[i].refresh == mode->refresh)
             return true;
     }
     return false;
@@ -153,12 +148,10 @@ bool is_duplicate_mode(MODE *mode, int count, MODE *modes)
 #include <windows.h>
 //#pragma comment(lib, "user32.lib")
 
-MODE_DATA
-{
+MODE_DATA {
 };
 
-MONITOR_DATA
-{
+MONITOR_DATA {
     WCHAR adapter_name[32];
     WCHAR display_name[32];
     bool modes_pruned;
@@ -181,11 +174,9 @@ bool get_settings(DEVMODEW *settings, WCHAR *parent, int index)
 bool is_acceptable_mode(MONITOR *monitor, DEVMODEW *settings)
 {
 
-    if(monitor->_data->modes_pruned)
-    {
+    if(monitor->_data->modes_pruned) {
         if(ChangeDisplaySettingsExW(monitor->_data->adapter_name, settings, NULL, CDS_TEST, NULL)
-                != DISP_CHANGE_SUCCESSFUL)
-        {
+           != DISP_CHANGE_SUCCESSFUL) {
             return false;
         }
     }
@@ -209,10 +200,8 @@ void detect_modes(MONITOR *monitor)
     get_settings(&current, monitor->_data->adapter_name, ENUM_CURRENT_SETTINGS);
 
     // Count modes
-    for(int i=0; get_settings(&settings, monitor->_data->adapter_name, i); ++i)
-    {
-        if(is_acceptable_mode(monitor, &settings))
-        {
+    for(int i=0; get_settings(&settings, monitor->_data->adapter_name, i); ++i) {
+        if(is_acceptable_mode(monitor, &settings)) {
             ++count;
         }
     }
@@ -220,22 +209,16 @@ void detect_modes(MONITOR *monitor)
     // Initialize modes
     modes = alloc_modes(count);
     int mode = 0;
-    for(int i=0; get_settings(&settings, monitor->_data->adapter_name, i); ++i)
-    {
-        if(is_acceptable_mode(monitor, &settings))
-        {
+    for(int i=0; get_settings(&settings, monitor->_data->adapter_name, i); ++i) {
+        if(is_acceptable_mode(monitor, &settings)) {
             modes[mode].monitor = monitor;
             modes[mode].width = settings.dmPelsWidth;
             modes[mode].height = settings.dmPelsHeight;
             modes[mode].refresh = settings.dmDisplayFrequency;
-            if(is_duplicate_mode(&modes[mode], mode, modes))
-            {
+            if(is_duplicate_mode(&modes[mode], mode, modes)) {
                 --count;
-            }
-            else
-            {
-                if(is_comparable_setting(settings, current))
-                {
+            } else {
+                if(is_comparable_setting(settings, current)) {
                     monitor->current_mode = &modes[mode];
                 }
                 ++mode;
@@ -282,12 +265,9 @@ MONITORS_EXPORT bool libmonitors_detect(int *ext_count, MONITOR ***ext_monitors)
     bool hasDisplays = false;
 
     // Detect if any displays at all
-    for(int i=0; get_device(&adapter, NULL, i); i++)
-    {
-        if(adapter.StateFlags & DISPLAY_DEVICE_ACTIVE)
-        {
-            if(get_device(&display, adapter.DeviceName, 0))
-            {
+    for(int i=0; get_device(&adapter, NULL, i); i++) {
+        if(adapter.StateFlags & DISPLAY_DEVICE_ACTIVE) {
+            if(get_device(&display, adapter.DeviceName, 0)) {
                 hasDisplays = true;
                 break;
             }
@@ -295,19 +275,13 @@ MONITORS_EXPORT bool libmonitors_detect(int *ext_count, MONITOR ***ext_monitors)
     }
 
     // Count monitors
-    for(int i=0; get_device(&adapter, NULL, i); i++)
-    {
-        if((adapter.StateFlags & DISPLAY_DEVICE_ACTIVE))
-        {
-            if(hasDisplays)
-            {
-                for(int j=0; get_device(&display, adapter.DeviceName, j); j++)
-                {
+    for(int i=0; get_device(&adapter, NULL, i); i++) {
+        if((adapter.StateFlags & DISPLAY_DEVICE_ACTIVE)) {
+            if(hasDisplays) {
+                for(int j=0; get_device(&display, adapter.DeviceName, j); j++) {
                     ++count;
                 }
-            }
-            else
-            {
+            } else {
                 ++count;
             }
         }
@@ -316,21 +290,15 @@ MONITORS_EXPORT bool libmonitors_detect(int *ext_count, MONITOR ***ext_monitors)
     // Initialize monitors
     monitors = alloc_monitors(count);
     int monitor = 0;
-    for(int i=0; get_device(&adapter, NULL, i); i++)
-    {
-        if((adapter.StateFlags & DISPLAY_DEVICE_ACTIVE))
-        {
+    for(int i=0; get_device(&adapter, NULL, i); i++) {
+        if((adapter.StateFlags & DISPLAY_DEVICE_ACTIVE)) {
 
-            if(hasDisplays)
-            {
-                for(int j=0; get_device(&display, adapter.DeviceName, j); j++)
-                {
+            if(hasDisplays) {
+                for(int j=0; get_device(&display, adapter.DeviceName, j); j++) {
                     monitors[monitor] = process_monitor(&adapter, &display);
                     monitor++;
                 }
-            }
-            else
-            {
+            } else {
                 monitors[monitor] = process_monitor(&adapter, NULL);
                 monitor++;
             }
@@ -344,8 +312,7 @@ MONITORS_EXPORT bool libmonitors_detect(int *ext_count, MONITOR ***ext_monitors)
 
 MONITORS_EXPORT bool libmonitors_make_mode_current(MODE *mode)
 {
-    if(mode->monitor->current_mode != mode)
-    {
+    if(mode->monitor->current_mode != mode) {
         DEVMODEW settings;
         ZeroMemory(&settings, sizeof(DEVMODEW));
         settings.dmSize = sizeof(DEVMODEW);
@@ -358,12 +325,9 @@ MONITORS_EXPORT bool libmonitors_make_mode_current(MODE *mode)
                                     &settings,
                                     NULL,
                                     CDS_FULLSCREEN,
-                                    NULL) == DISP_CHANGE_SUCCESSFUL)
-        {
+                                    NULL) == DISP_CHANGE_SUCCESSFUL) {
             mode->monitor->current_mode = mode;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -391,13 +355,11 @@ MONITORS_EXPORT void libmonitors_deinit()
 #include <CoreVideo/CVBase.h>
 #include <CoreVideo/CVDisplayLink.h>
 
-MODE_DATA
-{
+MODE_DATA {
     int32_t mode_id;
 };
 
-MONITOR_DATA
-{
+MONITOR_DATA {
     CGDirectDisplayID display_id;
 };
 
@@ -418,15 +380,13 @@ bool process_mode(MODE *mode, CGDisplayModeRef display_mode, CVDisplayLinkRef di
 
     uint32_t mode_flags = CGDisplayModeGetIOFlags(display_mode);
     if((mode_flags & kDisplayModeValidFlag)
-            && (mode_flags & kDisplayModeSafeFlag)
-            && !(mode_flags & kDisplayModeInterlacedFlag)
-            && !(mode_flags & kDisplayModeStretchedFlag))
-    {
+       && (mode_flags & kDisplayModeSafeFlag)
+       && !(mode_flags & kDisplayModeInterlacedFlag)
+       && !(mode_flags & kDisplayModeStretchedFlag)) {
 
         CFStringRef format = CGDisplayModeCopyPixelEncoding(display_mode);
         if(!CFStringCompare(format, CFSTR(IO16BitDirectPixels), 0)
-                || !CFStringCompare(format, CFSTR(IO32BitDirectPixels), 0))
-        {
+           || !CFStringCompare(format, CFSTR(IO32BitDirectPixels), 0)) {
 
             if(mode->_data == NULL)
                 mode->_data = calloc(1, sizeof(MODE_DATA));
@@ -437,11 +397,9 @@ bool process_mode(MODE *mode, CGDisplayModeRef display_mode, CVDisplayLinkRef di
             mode->refresh = (int)CGDisplayModeGetRefreshRate(display_mode);
 
             // Attempt to recover by calculation if possible
-            if(mode->refresh == 0)
-            {
+            if(mode->refresh == 0) {
                 const CVTime time = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(display_link);
-                if(!(time.flags & kCVTimeIsIndefinite))
-                {
+                if(!(time.flags & kCVTimeIsIndefinite)) {
                     mode->refresh = (int)(time.timeScale / (double)time.timeValue);
                 }
             }
@@ -465,14 +423,11 @@ void detect_modes(MONITOR *monitor)
     int mode_count = CFArrayGetCount(display_modes);
 
     modes = alloc_modes(mode_count);
-    for(int i=0; i<mode_count; ++i)
-    {
+    for(int i=0; i<mode_count; ++i) {
         CGDisplayModeRef display_mode = (CGDisplayModeRef)CFArrayGetValueAtIndex(display_modes, i);
         modes[count].monitor = monitor;
-        if(process_mode(&modes[count], display_mode, display_link))
-        {
-            if(CGDisplayModeGetIODisplayModeID(display_mode) == CGDisplayModeGetIODisplayModeID(current_mode))
-            {
+        if(process_mode(&modes[count], display_mode, display_link)) {
+            if(CGDisplayModeGetIODisplayModeID(display_mode) == CGDisplayModeGetIODisplayModeID(current_mode)) {
                 monitor->current_mode = &modes[count];
             }
             ++count;
@@ -489,20 +444,16 @@ void detect_modes(MONITOR *monitor)
 
 MONITOR *process_monitor(CGDirectDisplayID display)
 {
-    if(!CGDisplayIsAsleep(display))
-    {
+    if(!CGDisplayIsAsleep(display)) {
         MONITOR *monitor = alloc_monitor(sizeof(MONITOR_DATA));
 
         CFDictionaryRef info = IODisplayCreateInfoDictionary(CGDisplayIOServicePort(display),
                                kIODisplayOnlyPreferredName);
         CFDictionaryRef names = CFDictionaryGetValue(info, CFSTR(kDisplayProductName));
         CFStringRef value;
-        if(names == NULL || !CFDictionaryGetValueIfPresent(names, CFSTR("en_US"), (const void**) &value))
-        {
+        if(names == NULL || !CFDictionaryGetValueIfPresent(names, CFSTR("en_US"), (const void**) &value)) {
             monitor->name = copy_str("Unknown");
-        }
-        else
-        {
+        } else {
             CFIndex size = CFStringGetMaximumSizeForEncoding(CFStringGetLength(value),
                            kCFStringEncodingASCII);
             char *name = calloc(size+1, sizeof(char));
@@ -537,11 +488,9 @@ MONITORS_EXPORT bool libmonitors_detect(int *ext_count, MONITOR ***ext_monitors)
     CGGetOnlineDisplayList(display_count, display_ids, &display_count);
 
     monitors = alloc_monitors(display_count);
-    for(int i=0; i<display_count; ++i)
-    {
+    for(int i=0; i<display_count; ++i) {
         MONITOR *monitor = process_monitor(display_ids[i]);
-        if(monitor != NULL)
-        {
+        if(monitor != NULL) {
             monitors[count] = monitor;
             ++count;
         }
@@ -556,8 +505,7 @@ MONITORS_EXPORT bool libmonitors_detect(int *ext_count, MONITOR ***ext_monitors)
 
 MONITORS_EXPORT bool libmonitors_make_mode_current(MODE *mode)
 {
-    if(mode->monitor->current_mode != mode)
-    {
+    if(mode->monitor->current_mode != mode) {
         int success = false;
 
         CGDirectDisplayID display_id = mode->monitor->_data->display_id;
@@ -568,20 +516,16 @@ MONITORS_EXPORT bool libmonitors_make_mode_current(MODE *mode)
         CFIndex mode_count = CFArrayGetCount(display_modes);
 
         CGDisplayModeRef chosen = NULL;
-        for(int i=0; i<mode_count; ++i)
-        {
+        for(int i=0; i<mode_count; ++i) {
             CGDisplayModeRef display_mode = (CGDisplayModeRef)CFArrayGetValueAtIndex(display_modes, i);
-            if(mode->_data->mode_id == CGDisplayModeGetIODisplayModeID(display_mode))
-            {
+            if(mode->_data->mode_id == CGDisplayModeGetIODisplayModeID(display_mode)) {
                 chosen = display_mode;
                 break;
             }
         }
 
-        if(chosen != NULL)
-        {
-            if(CGDisplaySetDisplayMode(display_id, chosen, NULL) == kCGErrorSuccess)
-            {
+        if(chosen != NULL) {
+            if(CGDisplaySetDisplayMode(display_id, chosen, NULL) == kCGErrorSuccess) {
                 success = true;
             }
         }
@@ -616,13 +560,11 @@ static Display *display = NULL;
 static Window root = 0;
 static int screen = 0;
 
-MODE_DATA
-{
+MODE_DATA {
     RRMode rrmode;
 };
 
-MONITOR_DATA
-{
+MONITOR_DATA {
     RROutput rroutput;
     RRCrtc rrcrtc;
 };
@@ -643,8 +585,7 @@ bool test_xrandr()
 {
     int eventBase, errorBase, major, minor;
     if(XRRQueryExtension(display, &eventBase, &errorBase)
-            && XRRQueryVersion(display, &major, &minor))
-    {
+       && XRRQueryVersion(display, &major, &minor)) {
         return (major > 1 || minor >= 3);
     }
     return false;
@@ -659,40 +600,30 @@ bool process_mode(MODE *mode, XRRScreenResources *screen_resources,
         mode->_data = calloc(1, sizeof(MODE_DATA));
     mode->_data->rrmode = output_mode;
 
-    for(int j=0; j<screen_resources->nmode; ++j)
-    {
+    for(int j=0; j<screen_resources->nmode; ++j) {
         mode_info = screen_resources->modes[j];
         if(mode_info.id == output_mode)
             break;
     }
 
-    if((mode_info.modeFlags & RR_Interlace) == 0)
-    {
-        if(crtc_info->rotation != RR_Rotate_90 && crtc_info->rotation != RR_Rotate_270)
-        {
+    if((mode_info.modeFlags & RR_Interlace) == 0) {
+        if(crtc_info->rotation != RR_Rotate_90 && crtc_info->rotation != RR_Rotate_270) {
             mode->width = mode_info.width;
             mode->height = mode_info.height;
-        }
-        else
-        {
+        } else {
             mode->width = mode_info.height;
             mode->height = mode_info.width;
         }
 
-        if(mode_info.hTotal && mode_info.vTotal)
-        {
+        if(mode_info.hTotal && mode_info.vTotal) {
             mode->refresh = (int)((double)mode_info.dotClock /
                                   ((double)mode_info.hTotal *
                                    (double)mode_info.vTotal));
-        }
-        else
-        {
+        } else {
             mode->refresh = -1;
         }
         return true;
-    }
-    else
-    {
+    } else {
         return false;
     }
 }
@@ -710,20 +641,16 @@ void detect_modes(MONITOR *monitor, RRCrtc crtc, RROutput output)
     MODE *modes = NULL;
     int count = 0;
 
-    if(test_xrandr())
-    {
+    if(test_xrandr()) {
         XRRScreenResources *screen_resources = XRRGetScreenResourcesCurrent(display, root);
         XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(display, screen_resources, crtc);
         XRROutputInfo *output_info = XRRGetOutputInfo(display, screen_resources, output);
 
         modes = alloc_modes(output_info->nmode);
 
-        for(int i=0; i<output_info->nmode; ++i)
-        {
-            if(process_mode(&modes[count], screen_resources, crtc_info, output_info->modes[i]))
-            {
-                if(!is_duplicate_mode(&modes[count], count, modes))
-                {
+        for(int i=0; i<output_info->nmode; ++i) {
+            if(process_mode(&modes[count], screen_resources, crtc_info, output_info->modes[i])) {
+                if(!is_duplicate_mode(&modes[count], count, modes)) {
                     modes[count].monitor = monitor;
                     if(crtc_info->mode == output_info->modes[i])
                         monitor->current_mode = &modes[count];
@@ -735,9 +662,7 @@ void detect_modes(MONITOR *monitor, RRCrtc crtc, RROutput output)
         XRRFreeOutputInfo(output_info);
         XRRFreeCrtcInfo(crtc_info);
         XRRFreeScreenResources(screen_resources);
-    }
-    else
-    {
+    } else {
         count = 1;
         modes = alloc_modes(count);
         process_mode_default(&modes[0]);
@@ -753,20 +678,16 @@ MONITOR *process_monitor(XRRScreenResources *screen_resources, RRCrtc crtc, RROu
     XRROutputInfo *output_info = XRRGetOutputInfo(display, screen_resources, output);
     MONITOR *monitor = NULL;
 
-    if(output_info->connection == RR_Connected)
-    {
+    if(output_info->connection == RR_Connected) {
         monitor = alloc_monitor(sizeof(MONITOR_DATA));
         monitor->name = copy_str(output_info->name);
         monitor->_data->rroutput = output;
         monitor->_data->rrcrtc = crtc;
 
-        if(crtc_info->rotation != RR_Rotate_90 && crtc_info->rotation != RR_Rotate_270)
-        {
+        if(crtc_info->rotation != RR_Rotate_90 && crtc_info->rotation != RR_Rotate_270) {
             monitor->width = output_info->mm_width;
             monitor->height = output_info->mm_height;
-        }
-        else
-        {
+        } else {
             monitor->width = output_info->mm_height;
             monitor->height = output_info->mm_width;
         }
@@ -794,25 +715,20 @@ MONITORS_EXPORT bool libmonitors_detect(int *ext_count, MONITOR ***ext_monitors)
     MONITOR **monitors = NULL;
     int count = 0;
 
-    if(test_xrandr())
-    {
+    if(test_xrandr()) {
         XRRScreenResources *screen_resources = XRRGetScreenResources(display, root);
         RROutput primary_output = XRRGetOutputPrimary(display, root);
 
         monitors = alloc_monitors(screen_resources->noutput);
-        for(int i=0; i<screen_resources->ncrtc; ++i)
-        {
+        for(int i=0; i<screen_resources->ncrtc; ++i) {
             RRCrtc crtc = screen_resources->crtcs[i];
             XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(display, screen_resources, crtc);
 
-            for(int j=0; j<crtc_info->noutput; ++j)
-            {
+            for(int j=0; j<crtc_info->noutput; ++j) {
                 RROutput output = crtc_info->outputs[j];
                 MONITOR *monitor = process_monitor(screen_resources, crtc, output);
-                if(monitor != NULL)
-                {
-                    if(output == primary_output)
-                    {
+                if(monitor != NULL) {
+                    if(output == primary_output) {
                         monitor->primary = true;
                     }
                     monitors[count] = monitor;
@@ -823,9 +739,7 @@ MONITORS_EXPORT bool libmonitors_detect(int *ext_count, MONITOR ***ext_monitors)
             XRRFreeCrtcInfo(crtc_info);
         }
         XRRFreeScreenResources(screen_resources);
-    }
-    else
-    {
+    } else {
         count = 1;
         monitors = alloc_monitors(count);
         monitors[0]->primary = true;
@@ -841,8 +755,7 @@ MONITORS_EXPORT bool libmonitors_make_mode_current(MODE *mode)
 {
     if(!display || !test_xrandr()) return false;
 
-    if(mode->monitor->current_mode != mode)
-    {
+    if(mode->monitor->current_mode != mode) {
         int success = false;
         XRRScreenResources *screen_resources = XRRGetScreenResources(display, root);
         XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(display,
@@ -858,8 +771,7 @@ MONITORS_EXPORT bool libmonitors_make_mode_current(MODE *mode)
                              mode->_data->rrmode,
                              crtc_info->rotation,
                              crtc_info->outputs,
-                             crtc_info->noutput))
-        {
+                             crtc_info->noutput)) {
             success = true;
             mode->monitor->current_mode = mode;
         }
@@ -874,8 +786,7 @@ MONITORS_EXPORT bool libmonitors_make_mode_current(MODE *mode)
 
 MONITORS_EXPORT bool libmonitors_init()
 {
-    if(!display)
-    {
+    if(!display) {
         display = XOpenDisplay(NULL);
         if(!display) return false;
 
@@ -887,8 +798,7 @@ MONITORS_EXPORT bool libmonitors_init()
 
 MONITORS_EXPORT void libmonitors_deinit()
 {
-    if(display)
-    {
+    if(display) {
         XCloseDisplay(display);
         display = NULL;
         root = 0;

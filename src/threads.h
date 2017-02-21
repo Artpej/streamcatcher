@@ -21,8 +21,7 @@ void thread_release(thread * t);
 
 #endif
 
-struct func_holder
-{
+struct func_holder {
     runnable func;
 };
 
@@ -76,8 +75,7 @@ thread * thread_create(runnable run)
     struct func_holder * holder = malloc(sizeof(struct func_holder));
     holder->func = run;
     ret = pthread_create( t, NULL, _run, holder);
-    if (ret == 0)
-    {
+    if (ret == 0) {
         return t;
     }
     return NULL;

@@ -60,15 +60,9 @@ int main(int argc, char ** argv)
       free_packet(pkt);
 
     */
-    libmonitors_init();
-    int count = 0;
-    struct libmonitors_monitor **monitors = malloc(10* sizeof(struct libmonitors_monitor *));
-    if(!libmonitors_detect(&count, &monitors)) {
-        // Error handling
-        printf("error\n");
-    }
-    for(int i = 0; i < count; i++) {
-        printf("screen: %s %dx%d\n",monitors[i]->name, monitors[i]->current_mode->width, monitors[i]->current_mode->height);
+    screens * screens = screens_get();
+    for(int i = 0; i < screens->count; i++) {
+        printf("screen: %s %dx%d\n",screens->list[i]->name, screens->list[i]->width, screens->list[i]->height);
     }
 
     fgetc(stdin);

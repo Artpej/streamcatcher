@@ -19,8 +19,7 @@ typedef int sock;
 #endif
 
 
-typedef struct _packet
-{
+typedef struct _packet {
     char boundary[64];
     char type[128];
     long size;
@@ -63,16 +62,14 @@ sock socket_create(const char * host, int port)
     WSAStartup(MAKEWORD(2,0), &WSAData);
     SOCKADDR_IN sin;
     sock s = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL,0,0 );
-    if(s == INVALID_SOCKET)
-    {
+    if(s == INVALID_SOCKET) {
         _print_last_error();
     }
     struct hostent *hostinfo = gethostbyname(host);
     sin.sin_addr.s_addr = ((struct in_addr *)(hostinfo->h_addr))->s_addr;
     sin.sin_family = AF_INET;
     sin.sin_port = htons(port);
-    if( connect(s, (SOCKADDR *)&sin, sizeof(sin)) == SOCKET_ERROR )
-    {
+    if( connect(s, (SOCKADDR *)&sin, sizeof(sin)) == SOCKET_ERROR ) {
         _print_last_error();
     }
     return s;
@@ -83,8 +80,7 @@ char socket_read(sock s)
 {
     char c[1];
     int res = recv(s, c, 1, 0);
-    if(res == SOCKET_ERROR)
-    {
+    if(res == SOCKET_ERROR) {
         _print_last_error();
     }
     return c[0];
@@ -92,8 +88,7 @@ char socket_read(sock s)
 
 void socket_write(sock s, char * buffer, int size)
 {
-    if(send(s, buffer, size, 0) == SOCKET_ERROR)
-    {
+    if(send(s, buffer, size, 0) == SOCKET_ERROR) {
         _print_last_error();
     }
 
@@ -117,16 +112,14 @@ sock socket_create(const char * host, int port)
 {
     struct sockaddr_in sin;
     sock s = socket(AF_INET, SOCK_STREAM, 0);
-    if( s < 0)
-    {
+    if( s < 0) {
         _print_last_error();
     }
     struct hostent *hostinfo = gethostbyname(host);
     sin.sin_addr.s_addr = *(in_addr_t *) hostinfo->h_addr_list[0];
     sin.sin_family = AF_INET;
     sin.sin_port = htons(port);
-    if( connect(s, (struct sockaddr *)&sin, sizeof(sin)) < 0 )
-    {
+    if( connect(s, (struct sockaddr *)&sin, sizeof(sin)) < 0 ) {
         _print_last_error();
     }
     return s;
@@ -136,8 +129,7 @@ char socket_read(sock s)
 {
     char c[1];
     int res = recv(s, c, sizeof(char), 0);
-    if(res < 0)
-    {
+    if(res < 0) {
         _print_last_error();
     }
     return c[0];
@@ -145,8 +137,7 @@ char socket_read(sock s)
 
 void socket_write(sock s, char * buffer, int size)
 {
-    if(send(s, buffer, size, 0) < 0)
-    {
+    if(send(s, buffer, size, 0) < 0) {
         _print_last_error();
     }
 }
@@ -163,16 +154,13 @@ char * read_trimmed_line(sock s)
     char c = socket_read(s);
     int ptr = 0;
     char buffer[1024];
-    while(c && ptr < 1024)
-    {
-        if(c == '\n')
-        {
+    while(c && ptr < 1024) {
+        if(c == '\n') {
             buffer[ptr] = '\0';
             ptr++;
             break;
         }
-        if(c == ' ' || c == '\r')
-        {
+        if(c == ' ' || c == '\r') {
             c = socket_read(s);
             continue;
         }
@@ -203,8 +191,7 @@ packet * read_packet(sock s)
     free(line);
     free(read_trimmed_line(s));
     pkt->payload = malloc(pkt->size * sizeof(char));
-    for(int i = 0; i < pkt->size; i++)
-    {
+    for(int i = 0; i < pkt->size; i++) {
         pkt->payload[i] = socket_read(s);
     }
     pkt->payload[pkt->size] = '\0';
